@@ -18,13 +18,18 @@
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 
 // STATES
-#define DISARMED = 0
+#define DISARMED 0
 #define ARMING 1
 #define ARMED 2
-#define DISARMING 2
+#define DISARMING 3
+#define DETONATED 4
 
+#define TWO_MINS_IN_MILLIS 120000
+#define THIRTY_SECONDS_IN_MILLIS 30000
 
-
+int armRemaining = 0;
+int disarmRemaining = 0;
+int current_state = DISARMED;
 
 void setup() {
   tft.initR(INITR_BLACKTAB);
@@ -36,6 +41,16 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  switch(current_state) {
+    case DISARMED:
+      break;
+    case ARMING:
+      break;
+    case ARMED:
+      break;
+    case DISARMING:
+      break;
+    case DETONATED:
+      break;
+  }
 }
