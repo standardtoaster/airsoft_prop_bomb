@@ -16,7 +16,6 @@
 #define THIRTY_SECONDS_IN_MILLIS 30000
 
 unsigned long arm_target = 0;
-unsigned long arm_time = 0;
 unsigned long disarm_target = 0;
 unsigned long disarm_time = 0;
 int current_state = DISARMED;
@@ -36,35 +35,69 @@ void handle_arm_button_on(){
   }
 }
 
-
-/*
-
-*/
-
 void handle_arm_button_off(){
   if (current_state == ARMING)
   {
     current_state = ARMED;
     digitalWrite(ARM_LED, HIGH);
+    arm_target = millis() + TWO_MINS_IN_MILLIS;
   }
+}
+
+void handle_disarm_button_on() {
+
+}
+void handle_disarm_button_off() {
+
+}
+
+void render_arm_countdown() {
+
+}
+void render_disarm_countdown() {
+
+}
+
+void render_detonated()
+{
+
 }
 
 void loop() {
   switch(current_state) {
     case DISARMED:
       /*
-      Handle the disarmed state. The only state that this can transition to is
-      ARMED, by flicking the arm switch, the transition of which is handled by
-      interrupts
+      Handle the DISARMED state. The only state that this can transition to is
+      ARMIGN, by flicking the arm switch, the transition of which is handled by
+      interrupts.
       */
+      //TODO: Lights should be off, displays should be off, reset counters
       break;
     case ARMING:
+      /*
+      Handle the ARMING state. The only state that this can transition to is
+      ARMED, by flicking the arm switch, the transition of which is handled by
+      interrupts.
+      */
       break;
     case ARMED:
+      // If the arm_target is now or later than now BOOM!
+      render_arm_countdown();
+      if (arm_target >= millis()) {
+        current_state = DETONATED;
+      }
       break;
     case DISARMING:
+      render_arm_countdown();
+      render_disarm_countdown();
+      if (disarm_target >= millis())
+      {
+        current_state = DISARMED;
+      }
       break;
     case DETONATED:
+      //The only way to turn this off is to cycle the power
+      render_detonated();
       break;
   }
 }
