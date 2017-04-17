@@ -1,21 +1,9 @@
 #include <Arduino.h>
-#include <SPI.h>
-
-#include <Adafruit_ST7735.h>
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
 
 // DAS PINS
-#define ARM_BUTTON 3;
-#define ARM_LED 5;
-#define DISARM_BUTTON_ONE 8;
-#define DISARM_BUTTON_TWO 9;
-
-// TFT setup
-#define TFT_CS     21
-#define TFT_RST    0
-#define TFT_DC     20
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
+#define ARM_BUTTON 3
+#define ARM_LED 5
+#define DISARM_BUTTON_ONE 8
 
 // STATES
 #define DISARMED 0
@@ -27,22 +15,48 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 #define TWO_MINS_IN_MILLIS 120000
 #define THIRTY_SECONDS_IN_MILLIS 30000
 
-int armRemaining = 0;
-int disarmRemaining = 0;
+unsigned long arm_target = 0;
+unsigned long arm_time = 0;
+unsigned long disarm_target = 0;
+unsigned long disarm_time = 0;
 int current_state = DISARMED;
 
 void setup() {
-  tft.initR(INITR_BLACKTAB);
+}
 
-  tft.setCursor(0, 0);
-  tft.setTextColor(ST7735_BLACK);
-  tft.setTextWrap(true);
-  tft.print("hello world");
+
+void handle_arm_button_on(){
+  /*
+    The arm button has been flicked on. Handle state transition.
+    This is probably bad to do in an ISR.
+  */
+  if (current_state == DISARMED) {
+    // change state to arming and turn on the LED
+    current_state = ARMING;
+  }
+}
+
+
+/*
+
+*/
+
+void handle_arm_button_off(){
+  if (current_state == ARMING)
+  {
+    current_state = ARMED;
+    digitalWrite(ARM_LED, HIGH);
+  }
 }
 
 void loop() {
   switch(current_state) {
     case DISARMED:
+      /*
+      Handle the disarmed state. The only state that this can transition to is
+      ARMED, by flicking the arm switch, the transition of which is handled by
+      interrupts
+      */
       break;
     case ARMING:
       break;
