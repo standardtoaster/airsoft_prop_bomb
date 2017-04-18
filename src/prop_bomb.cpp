@@ -167,6 +167,8 @@ void setup() {
   disarm_timer.begin(0x71);
   blank_display(arm_timer);
   blank_display(disarm_timer);
+  biohazard_strip.begin();
+  biohazard_strip.show();
 }
 
 void loop() {
