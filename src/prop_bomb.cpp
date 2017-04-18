@@ -70,10 +70,12 @@ void handle_arm_button_off(){
 }
 
 void handle_disarm_button_on() {
-
+  if (current_state != DISARMING) {
+    disarm_target = millis() + THIRTY_SECONDS_IN_MILLIS;
+  }
   current_state = DISARMING;
-
 }
+
 void handle_disarm_button_off() {
   // give 250ms before we flip the state back to armed.
   if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
