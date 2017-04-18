@@ -7,6 +7,7 @@
 #define ARM_BUTTON 3
 #define ARM_LED 5
 #define DISARM_BUTTON_ONE 8
+#define BIOHAZARD_PIN 0 // TODO: FIXME
 
 // STATES
 #define DISARMED 0
@@ -19,6 +20,15 @@
 #define THIRTY_SECONDS_IN_MILLIS 30000
 #define DISARM_GRACE_IN_MILLIS 250
 
+// How fast the biohazard LED strip blinks. Basically if millis() % VAL is 0,
+// this will change state. 1000 would be once a second, 250 would be 4 a second.
+#define BIOHAZARD_BLINK_INTERVAL 250
+
+// The number of pixels in the biohazard strip.
+#define BIOHAZARD_PIXEL_COUNT 5
+
+#define BIOHAZARD_GREEN
+
 unsigned long arm_target = 0;
 unsigned long disarm_target = 0;
 unsigned long disarm_time = 0;
@@ -27,6 +37,17 @@ int current_state = DISARMED;
 
 Adafruit_7segment arm_timer = Adafruit_7segment();
 Adafruit_7segment disarm_timer = Adafruit_7segment();
+
+Adafruit_NeoPixel biohazard_strip = Adafruit_NeoPixel(
+  BIOHAZARD_PIXEL_COUNT,
+  BIOHAZARD_PIN,
+  NEO_RGB
+);
+
+uint32_t biohazard_off = biohazard_strip.Color(0, 0, 0);
+uint32_t biohazard_red = biohazard_strip.Color(255, 0, 0);
+uint32_t biohazard_green = biohazard_strip.Color(0, 255, 0);
+uint32_t biohazard_blue = biohazard_strip.Color(0, 0, 255);
 
 void handle_arm_button_on(){
   /*
@@ -108,23 +129,36 @@ void render_disarm_countdown() {
   }
 }
 
-void render_biohazard(){
+void render_biohazard_pixel(int pixel_id) {
   switch(current_state) {
     case ARMED:
       // Solid green.
     case DISARMING:
       // Solid green.
+      biohazard_strip.setPixelColor(pixel_id, biohazard_green);
       // TODO: Code to make thing green.
       break;
     case DETONATED:
       // Flashing Red.
-      // TODO: Code to make thing flash red.
+      if (millis() % BIOHAZARD_BLINK_INTERVAL == 0) {
+        biohazard_strip.setPixelColor(pixel_id, biohazard_red);
+      } else if (millis() % (BIOHAZARD_BLINK_INTERVAL * 2) == 0) {
+        biohazard_strip.setPixelColor(pixel_id, biohazard_off);
+      }
       break;
     default:
       //all LEDs off.
-      // TODO: Code to make thing off.
+      biohazard_strip.setPixelColor(pixel_id, biohazard_off);
       break;
   }
+}
+
+void render_biohazard(){
+  int i = 0;
+  for( i = 0; i < BIOHAZARD_PIXEL_COUNT ; i += 1 ){
+    render_biohazard_pixel(i);
+  }
+  biohazard_strip.show();
 }
 
 void setup() {
