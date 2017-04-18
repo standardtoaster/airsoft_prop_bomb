@@ -107,10 +107,24 @@ void render_disarm_countdown() {
   }
 }
 
-void render_detonated() {
-
+void render_biohazard(){
+  switch(current_state) {
+    case ARMED:
+      // Solid green.
+    case DISARMING:
+      // Solid green.
+      // TODO: Code to make thing green.
+      break;
+    case DETONATED:
+      // Flashing Red.
+      // TODO: Code to make thing flash red.
+      break;
+    default:
+      //all LEDs off.
+      // TODO: Code to make thing off.
+      break;
+  }
 }
-
 
 void setup() {
   arm_timer.begin(0x70);
@@ -150,9 +164,9 @@ void loop() {
       break;
     case DETONATED:
       //The only way to turn this off is to cycle the power
-      render_detonated();
       break;
   }
   render_arm_countdown();
   render_disarm_countdown();
+  render_biohazard();
 }
