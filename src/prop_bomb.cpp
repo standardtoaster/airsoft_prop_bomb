@@ -27,11 +27,6 @@ int current_state = DISARMED;
 Adafruit_7segment arm_timer = Adafruit_7segment();
 Adafruit_7segment disarm_timer = Adafruit_7segment();
 
-void setup() {
-  arm_timer.begin(0x70);
-  disarm_timer.begin(0x71);
-}
-
 void handle_arm_button_on(){
   /*
     The arm button has been flicked on. Handle state transition.
@@ -89,26 +84,27 @@ void blank_display(Adafruit_7segment matrix) {
   matrix.drawColon(false);
   matrix.writeDigitRaw(3, 0);
   matrix.writeDigitRaw(4, 0);
+  matrix.writeDisplay();
 }
 
 void render_arm_countdown() {
   if (current_state == ARMED || current_state == DISARMING){
     arm_timer.drawColon(true);
     arm_timer.print(gen_countdown_time(arm_target - millis()));
+    arm_timer.writeDisplay();
   } else {
     blank_display(arm_timer);
   }
-  arm_timer.writeDisplay();
 }
 
 void render_disarm_countdown() {
   if (current_state == DISARMING){
     disarm_timer.drawColon(true);
     disarm_timer.print(gen_countdown_time(disarm_target - millis()));
+    disarm_timer.writeDisplay();
   } else {
     blank_display(disarm_timer);
   }
-  arm_timer.writeDisplay();
 }
 
 void render_detonated() {
@@ -116,6 +112,12 @@ void render_detonated() {
 }
 
 
+void setup() {
+  arm_timer.begin(0x70);
+  disarm_timer.begin(0x71);
+  blank_display(arm_timer);
+  blank_display(disarm_timer);
+}
 
 void loop() {
   switch(current_state) {
