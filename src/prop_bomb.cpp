@@ -81,7 +81,6 @@ void handle_disarm_button_off() {
   if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
     current_state = ARMED;
   }
-  //TODO: Turn off disarm display.
 }
 
 
