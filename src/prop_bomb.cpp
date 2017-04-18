@@ -27,12 +27,10 @@ int current_state = DISARMED;
 Adafruit_7segment arm_timer = Adafruit_7segment();
 Adafruit_7segment disarm_timer = Adafruit_7segment();
 
-
 void setup() {
   arm_timer.begin(0x70);
   disarm_timer.begin(0x71);
 }
-
 
 void handle_arm_button_on(){
   /*
@@ -67,24 +65,50 @@ void handle_disarm_button_off() {
   //TODO: Turn off disarm display.
 }
 
-struct countdownTime {
-  int minutes;
-  int seconds;
-};
-countdownTime gen_countdown_time(unsigned long time) {
-  struct countdownTime retval;
-  retval.minutes = time / 60;
-  retval.seconds = time % 60;
+
+unsigned int gen_countdown_time(unsigned long time) {
+  // Generate the countdown time as a 4 digit integer for display on a 4 unit 7
+  // segment display, which expects an int.
+
+  unsigned int retval = 0;
+
+  // Thanks to @mjonuschat for this nugget. Move the minutes over using simple
+  // multiplication.
+
+  // Minutes
+  retval += time / 60 * 100;
+  // Seconds
+  retval += time % 60;
 
   return retval;
 }
 
-void render_arm_countdown() {
+void blank_display(Adafruit_7segment matrix) {
+  matrix.writeDigitRaw(0, 0);
+  matrix.writeDigitRaw(1, 0);
+  matrix.drawColon(false);
+  matrix.writeDigitRaw(3, 0);
+  matrix.writeDigitRaw(4, 0);
+}
 
+void render_arm_countdown() {
+  if (current_state == ARMED || current_state == DISARMING){
+    arm_timer.drawColon(true);
+    arm_timer.print(gen_countdown_time(arm_target - millis()));
+  } else {
+    blank_display(arm_timer);
+  }
+  arm_timer.writeDisplay();
 }
 
 void render_disarm_countdown() {
-
+  if (current_state == DISARMING){
+    disarm_timer.drawColon(true);
+    disarm_timer.print(gen_countdown_time(disarm_target - millis()));
+  } else {
+    blank_display(disarm_timer);
+  }
+  arm_timer.writeDisplay();
 }
 
 void render_detonated() {
