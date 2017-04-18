@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
+#include "Adafruit_NeoPixel.h"
 
 // DAS PINS
 #define ARM_BUTTON 3
