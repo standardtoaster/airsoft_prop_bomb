@@ -180,6 +180,10 @@ void setup() {
 
   disarm_timer.drawColon(true);
   disarm_timer.writeDisplay();
+
+#ifdef DEBUG
+  Serial.println("Bomb V0.1 Initialized");
+#endif
 }
 
 void loop() {
@@ -235,6 +239,9 @@ void loop() {
         transition_state(DISARMED);
       }
       if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
+#ifdef DEBUG
+        Serial.println("Disarm Button OFF");
+#endif
         transition_state(ARMED);
         // consider the detonation countdown stopped while disarming, so restart
         // it here.
