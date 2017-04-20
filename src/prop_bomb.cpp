@@ -38,8 +38,8 @@ String states_to_words[5] = {
 #define BIOHAZARD_BLINK_INTERVAL 250
 
 // The number of pixels in the biohazard strip.
-#define BIOHAZARD_PIXEL_COUNT 3
-#define BIOHAZARD_PIXEL_BRIGHTNESS 32
+#define BIOHAZARD_PIXEL_COUNT 7
+#define BIOHAZARD_PIXEL_BRIGHTNESS 64
 
 unsigned long arm_target = 0;
 unsigned long disarm_target = 0;
