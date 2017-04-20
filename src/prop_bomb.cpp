@@ -46,7 +46,7 @@ unsigned long disarm_target = 0;
 unsigned long disarm_time = 0;
 unsigned long last_disarm_button_up_millis = 0;
 
-volatile int current_state = DISARMED;
+int current_state = DISARMED;
 
 Adafruit_7segment arm_timer = Adafruit_7segment();
 Adafruit_7segment disarm_timer = Adafruit_7segment();
