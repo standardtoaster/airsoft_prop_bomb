@@ -198,6 +198,8 @@ void setup() {
 #ifdef DEBUG
   Serial.println("Bomb V0.1 Initialized");
 #endif
+
+  transition_state(DISARMED);
 }
 
 void loop() {
@@ -207,6 +209,8 @@ void loop() {
       Handle the DISARMED state. The only state that this can transition to is
       ARMING, by flicking the arm switch.
       */
+      digitalWrite(ARM_LED, 0);
+      digitalWrite(DISARM_LED, 0);
       if (digitalRead(ARM_BUTTON) == 0) {
         #ifdef DEBUG
           Serial.println("Arm Button ON");
