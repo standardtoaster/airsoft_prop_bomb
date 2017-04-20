@@ -110,6 +110,9 @@ void handle_arm_button_off(){
 }
 
 void handle_disarm_button_on() {
+#ifdef DEBUG
+  Serial.println("Disarm Button ON");
+#endif
   if (current_state != DISARMING) {
     disarm_target = millis() + THIRTY_SECONDS_IN_MILLIS;
   }
@@ -118,6 +121,9 @@ void handle_disarm_button_on() {
 
 void handle_disarm_button_off() {
   // give 250ms before we flip the state back to armed.
+#ifdef DEBUG
+  Serial.println("Disarm Button Off");
+#endif
   if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
     transition_state(ARMED);
   }
