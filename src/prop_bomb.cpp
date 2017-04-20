@@ -234,11 +234,11 @@ void loop() {
       }
       break;
     case DISARMING:
-      if (disarm_target >= millis())
+      if (millis() >= disarm_target)
       {
         transition_state(DISARMED);
       }
-      if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
+      if (digitalRead(DISARM_BUTTON) == 1) {
 #ifdef DEBUG
         Serial.println("Disarm Button OFF");
 #endif
