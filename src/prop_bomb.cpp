@@ -224,10 +224,26 @@ void setup() {
 
   // Becuase we're using pullup resistors, "up" or "off" is HIGH and "down" / ON
   // is low.
-  attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_on, LOW);
-  attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_off, HIGH);
-  attachInterrupt(digitalPinToInterrupt(DISARM_BUTTON), handle_disarm_button_on, LOW);
-  attachInterrupt(digitalPinToInterrupt(DISARM_BUTTON), handle_disarm_button_off, HIGH);
+  attachInterrupt(
+    digitalPinToInterrupt(ARM_BUTTON),
+    handle_arm_button_on,
+    FALLING
+  );
+  attachInterrupt(
+    digitalPinToInterrupt(ARM_BUTTON),
+    handle_arm_button_off,
+    RISING
+  );
+  attachInterrupt(
+    digitalPinToInterrupt(DISARM_BUTTON),
+    handle_disarm_button_on,
+    FALLING
+  );
+  attachInterrupt(
+    digitalPinToInterrupt(DISARM_BUTTON),
+    handle_disarm_button_off,
+    RISING
+  );
 
   arm_timer.begin(0x70);
   disarm_timer.begin(0x71);
