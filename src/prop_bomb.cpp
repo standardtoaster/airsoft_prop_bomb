@@ -71,63 +71,6 @@ void transition_state(int state) {
   current_state = state;
 }
 
-/*
-To arm the bomb, we expect that the arm toggle will start in the "OFF" position,
-which is HIGH becuase we're using the internal pullup, so we that the flow will
-go something like
-OFF - HIGH - DISARMED
-ON - LOW - ARMING
-OFF - HIGH - ARMED
-*/
-
-void handle_arm_button_on(){
-  /*
-    The arm button has been flicked on. Handle state transition.
-    This is probably bad to do in an ISR.
-  */
-#ifdef DEBUG
-  Serial.println("Arm Button ON");
-#endif
-  if (current_state == DISARMED) {
-    // change state to arming and turn on the LED
-    transition_state(ARMING);
-    digitalWrite(ARM_LED, 1);
-  }
-}
-
-void handle_arm_button_off(){
-#ifdef DEBUG
-  Serial.println("Arm Button OFF");
-#endif
-  if (current_state == ARMING)
-  {
-    transition_state(ARMED);
-    digitalWrite(ARM_LED, HIGH);
-    arm_target = millis() + TWO_MINS_IN_MILLIS;
-  }
-}
-
-void handle_disarm_button_on() {
-#ifdef DEBUG
-  Serial.println("Disarm Button ON");
-#endif
-  if (current_state != DISARMING) {
-    disarm_target = millis() + THIRTY_SECONDS_IN_MILLIS;
-  }
-  transition_state(DISARMING);
-}
-
-void handle_disarm_button_off() {
-  // give 250ms before we flip the state back to armed.
-#ifdef DEBUG
-  Serial.println("Disarm Button Off");
-#endif
-  if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
-    transition_state(ARMED);
-  }
-}
-
-
 unsigned int gen_countdown_time(unsigned long time) {
   // Generate the countdown time as a 4 digit integer for display on a 4 unit 7
   // segment display, which expects an int.
@@ -222,29 +165,6 @@ void setup() {
   pinMode(DISARM_LED, OUTPUT);
   pinMode(BIOHAZARD_PIN, OUTPUT);
 
-  // Becuase we're using pullup resistors, "up" or "off" is HIGH and "down" / ON
-  // is low.
-  attachInterrupt(
-    digitalPinToInterrupt(ARM_BUTTON),
-    handle_arm_button_on,
-    FALLING
-  );
-  attachInterrupt(
-    digitalPinToInterrupt(ARM_BUTTON),
-    handle_arm_button_off,
-    RISING
-  );
-  attachInterrupt(
-    digitalPinToInterrupt(DISARM_BUTTON),
-    handle_disarm_button_on,
-    FALLING
-  );
-  attachInterrupt(
-    digitalPinToInterrupt(DISARM_BUTTON),
-    handle_disarm_button_off,
-    RISING
-  );
-
   arm_timer.begin(0x70);
   disarm_timer.begin(0x71);
   blank_display(arm_timer);
@@ -257,16 +177,20 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println(current_state);
-  //delay(50);
   switch(current_state) {
     case DISARMED:
       /*
       Handle the DISARMED state. The only state that this can transition to is
-      ARMIGN, by flicking the arm switch, the transition of which is handled by
-      interrupts.
+      ARMING, by flicking the arm switch.
       */
-      //TODO: Lights should be off, displays should be off, reset counters
+      if (digitalRead(ARM_BUTTON) == 0) {
+        #ifdef DEBUG
+          Serial.println("Arm Button ON");
+        #endif
+        // change state to arming and turn on the LED
+        transition_state(ARMING);
+        digitalWrite(ARM_LED, 1);
+      }
       break;
     case ARMING:
       /*
@@ -274,12 +198,29 @@ void loop() {
       ARMED, by flicking the arm switch, the transition of which is handled by
       interrupts.
       */
+      if (digitalRead(ARM_BUTTON) == 1) {
+        #ifdef DEBUG
+          Serial.println("Arm Button OFF");
+        #endif
+        // change state to arming and turn on the LED
+        transition_state(ARMED);
+        arm_target = millis() + TWO_MINS_IN_MILLIS;
+      }
       break;
     case ARMED:
       // If the arm_target is now or later than now BOOM!
-      digitalWrite(DISARM_LED, 1); // I don't think this needs to turn off.
+      digitalWrite(DISARM_LED, 1);
       if (arm_target >= millis()) {
         transition_state(DETONATED);
+      }
+      if (digitalRead(DISARM_BUTTON) == 0) {
+        #ifdef DEBUG
+          Serial.println("Disarm Button ON");
+        #endif
+        // change state to arming and turn on the LED
+        transition_state(DISARMING);
+        disarm_target = millis() + THIRTY_SECONDS_IN_MILLIS;
+        last_disarm_button_up_millis = millis();
       }
       break;
     case DISARMING:
@@ -287,9 +228,15 @@ void loop() {
       {
         transition_state(DISARMED);
       }
+      if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
+        transition_state(ARMED);
+      } else {
+        last_disarm_button_up_millis = millis();
+      }
       break;
     case DETONATED:
       //The only way to turn this off is to cycle the power
+      digitalWrite(DISARM_LED, 0);
       break;
   }
   render_arm_countdown();
