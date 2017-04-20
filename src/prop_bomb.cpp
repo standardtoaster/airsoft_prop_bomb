@@ -203,8 +203,9 @@ void setup() {
 
   pinMode(ARM_BUTTON, INPUT_PULLUP);
   pinMode(DISARM_BUTTON, INPUT_PULLUP);
-  pinMode(DISARM_LED, OUTPUT);
+
   pinMode(ARM_LED, OUTPUT);
+  pinMode(DISARM_LED, OUTPUT);
   pinMode(BIOHAZARD_PIN, OUTPUT);
 
   // Becuase we're using pullup resistors, "up" or "off" is HIGH and "down" / ON
