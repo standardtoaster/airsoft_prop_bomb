@@ -68,7 +68,7 @@ void transition_state(int state) {
   Serial.print("Transitioning State from ");
   Serial.print(states_to_words[current_state]);
   Serial.print(" to ");
-  Serial.print(states_to_words[state]);
+  Serial.println(states_to_words[state]);
 #endif
   current_state = state;
 }
@@ -87,7 +87,9 @@ void handle_arm_button_on(){
     The arm button has been flicked on. Handle state transition.
     This is probably bad to do in an ISR.
   */
+#ifdef DEBUG
   Serial.println("Arm Button ON");
+#endif
   if (current_state == DISARMED) {
     // change state to arming and turn on the LED
     transition_state(ARMING);
@@ -96,7 +98,9 @@ void handle_arm_button_on(){
 }
 
 void handle_arm_button_off(){
+#ifdef DEBUG
   Serial.println("Arm Button OFF");
+#endif
   if (current_state == ARMING)
   {
     transition_state(ARMED);
@@ -178,8 +182,14 @@ void render_biohazard_pixel(int pixel_id) {
     case DETONATED:
       // Flashing Red.
       if (millis() % BIOHAZARD_BLINK_INTERVAL == 0) {
+#ifdef DEBUG
+      Serial.println("BIOHAZARD: RED");
+#endif
         biohazard_strip.setPixelColor(pixel_id, biohazard_red);
       } else if (millis() % (BIOHAZARD_BLINK_INTERVAL * 2) == 0) {
+#ifdef DEBUG
+      Serial.println("BIOHAZARD: OFF");
+#endif
         biohazard_strip.setPixelColor(pixel_id, biohazard_off);
       }
       break;
