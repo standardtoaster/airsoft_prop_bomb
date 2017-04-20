@@ -73,7 +73,14 @@ void transition_state(int state) {
   current_state = state;
 }
 
-
+/*
+To arm the bomb, we expect that the arm toggle will start in the "OFF" position,
+which is HIGH becuase we're using the internal pullup, so we that the flow will
+go something like
+OFF - HIGH - DISARMED
+ON - LOW - ARMING
+OFF - HIGH - ARMED
+*/
 
 void handle_arm_button_on(){
   /*
@@ -193,12 +200,15 @@ void render_biohazard(){
 
 void setup() {
   Serial.begin(9600);
+
   pinMode(ARM_BUTTON, INPUT_PULLUP);
   pinMode(DISARM_BUTTON, INPUT_PULLUP);
   pinMode(DISARM_LED, OUTPUT);
   pinMode(ARM_LED, OUTPUT);
   pinMode(BIOHAZARD_PIN, OUTPUT);
 
+  // Becuase we're using pullup resistors, "up" or "off" is HIGH and "down" / ON
+  // is low.
   attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_on, LOW);
   attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_off, HIGH);
   attachInterrupt(digitalPinToInterrupt(DISARM_BUTTON), handle_disarm_button_on, LOW);
