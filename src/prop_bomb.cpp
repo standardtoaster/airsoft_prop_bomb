@@ -38,7 +38,8 @@ String states_to_words[5] = {
 #define BIOHAZARD_BLINK_INTERVAL 250
 
 // The number of pixels in the biohazard strip.
-#define BIOHAZARD_PIXEL_COUNT 18
+#define BIOHAZARD_PIXEL_COUNT 3
+#define BIOHAZARD_PIXEL_BRIGHTNESS 32
 
 unsigned long arm_target = 0;
 unsigned long disarm_target = 0;
@@ -61,7 +62,7 @@ uint32_t biohazard_red = biohazard_strip.Color(255, 0, 0);
 uint32_t biohazard_green = biohazard_strip.Color(0, 255, 0);
 uint32_t biohazard_blue = biohazard_strip.Color(0, 0, 255);
 uint32_t biohazard_white = biohazard_strip.Color(255, 255, 255);
-
+uint32_t biohazard_prev_colour = 0;
 
 void transition_state(int state) {
 #ifdef DEBUG
@@ -122,7 +123,7 @@ void render_disarm_countdown() {
   }
 }
 
-void render_biohazard_pixel(int pixel_id) {
+uint32_t gen_biohazard_colour() {
   uint32_t colour = biohazard_off;
   switch(current_state) {
     case DISARMED:
@@ -150,15 +151,25 @@ void render_biohazard_pixel(int pixel_id) {
       }
       break;
   }
-  biohazard_strip.setPixelColor(pixel_id, colour);
+  return colour;
 }
 
 void render_biohazard(){
-  int i = 0;
-  for( i = 0; i < BIOHAZARD_PIXEL_COUNT ; i += 1 ){
-    render_biohazard_pixel(i);
+
+  uint32_t colour = gen_biohazard_colour();
+
+  if (colour != biohazard_prev_colour) {
+    int i = 0;
+    for( i = 0; i < BIOHAZARD_PIXEL_COUNT ; i += 1 ){
+      biohazard_strip.setPixelColor(i, colour);
+    }
+    biohazard_strip.show();
+    biohazard_prev_colour = colour;
+#ifdef DEBUG
+    Serial.print("Strip Updated to: ");
+    Serial.println(colour);
+#endif
   }
-  biohazard_strip.show();
 }
 
 void setup() {
@@ -176,6 +187,7 @@ void setup() {
   blank_display(arm_timer);
   blank_display(disarm_timer);
   biohazard_strip.begin();
+  biohazard_strip.setBrightness(BIOHAZARD_PIXEL_BRIGHTNESS);
   biohazard_strip.show();
 
   disarm_timer.drawColon(true);
