@@ -80,8 +80,11 @@ unsigned int gen_countdown_time(unsigned long time) {
   // Thanks to @mjonuschat for this nugget. Move the minutes over using simple
   // multiplication..
 
+  // Turn that time into Seconds.
+  time = time / 1000;
+
   // Minutes
-  retval += time / 60 * 100;
+  retval += (time / 60) * 100;
   // Seconds
   retval += time % 60;
 
