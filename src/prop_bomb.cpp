@@ -128,6 +128,7 @@ uint32_t gen_biohazard_colour() {
   switch(current_state) {
     case DISARMED:
       colour = biohazard_white;
+      break;
     case ARMED:
       // Solid green.
     case DISARMING:
@@ -136,21 +137,22 @@ uint32_t gen_biohazard_colour() {
       break;
     case DETONATED:
       // Flashing Red.
-      if (millis() % BIOHAZARD_BLINK_INTERVAL == 0) {
-#ifdef DEBUG
-        Serial.println("BIOHAZARD: RED");
-        Serial.println(millis());
-#endif
-        colour = biohazard_red;
-      } else if (millis() % (BIOHAZARD_BLINK_INTERVAL * 2) == 0) {
-#ifdef DEBUG
-      Serial.println("BIOHAZARD: OFF");
-      Serial.println(millis());
-#endif
+      // TODO: Make flash.
+      /*
+      unsigned long now = millis();
+
+      if (now % (BIOHAZARD_BLINK_INTERVAL * 2) == 0) {
+
         colour = biohazard_off;
+      } else if (now % BIOHAZARD_BLINK_INTERVAL == 0) {
+
+        colour = biohazard_red;
       }
+      */
+      colour = biohazard_red;
       break;
   }
+  //return biohazard_white;
   return colour;
 }
 
