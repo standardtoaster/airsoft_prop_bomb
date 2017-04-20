@@ -3,11 +3,14 @@
 #include "Adafruit_LEDBackpack.h"
 #include "Adafruit_NeoPixel.h"
 
+#define DEBUG
+
 // DAS PINS
-#define ARM_BUTTON 3
-#define ARM_LED 5
-#define DISARM_BUTTON_ONE 8
-#define BIOHAZARD_PIN 0 // TODO: FIXME
+#define ARM_BUTTON 2
+#define ARM_LED 11
+#define DISARM_BUTTON 3
+#define DISARM_LED 10
+#define BIOHAZARD_PIN 8
 
 // STATES
 #define DISARMED 0
@@ -15,6 +18,17 @@
 #define ARMED 2
 #define DISARMING 3
 #define DETONATED 4
+
+#ifdef DEBUG
+String states_to_words[5] = {
+  "DISARMED",
+  "ARMING",
+  "ARMED",
+  "DISARMING",
+  "DETONATED",
+};
+
+#endif
 
 #define TWO_MINS_IN_MILLIS 120000
 #define THIRTY_SECONDS_IN_MILLIS 30000
@@ -49,21 +63,36 @@ uint32_t biohazard_red = biohazard_strip.Color(255, 0, 0);
 uint32_t biohazard_green = biohazard_strip.Color(0, 255, 0);
 uint32_t biohazard_blue = biohazard_strip.Color(0, 0, 255);
 
+void transition_state(int state) {
+#ifdef DEBUG
+  Serial.print("Transitioning State from ");
+  Serial.print(states_to_words[current_state]);
+  Serial.print(" to ");
+  Serial.print(states_to_words[state]);
+#endif
+  current_state = state;
+}
+
+
+
 void handle_arm_button_on(){
   /*
     The arm button has been flicked on. Handle state transition.
     This is probably bad to do in an ISR.
   */
+  Serial.println("Arm Button ON");
   if (current_state == DISARMED) {
     // change state to arming and turn on the LED
-    current_state = ARMING;
+    transition_state(ARMING);
+    digitalWrite(ARM_LED, 1);
   }
 }
 
 void handle_arm_button_off(){
+  Serial.println("Arm Button OFF");
   if (current_state == ARMING)
   {
-    current_state = ARMED;
+    transition_state(ARMED);
     digitalWrite(ARM_LED, HIGH);
     arm_target = millis() + TWO_MINS_IN_MILLIS;
   }
@@ -73,13 +102,13 @@ void handle_disarm_button_on() {
   if (current_state != DISARMING) {
     disarm_target = millis() + THIRTY_SECONDS_IN_MILLIS;
   }
-  current_state = DISARMING;
+  transition_state(DISARMING);
 }
 
 void handle_disarm_button_off() {
   // give 250ms before we flip the state back to armed.
   if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
-    current_state = ARMED;
+    transition_state(ARMED);
   }
 }
 
@@ -163,15 +192,32 @@ void render_biohazard(){
 }
 
 void setup() {
+  Serial.begin(9600);
+  pinMode(ARM_BUTTON, INPUT_PULLUP);
+  pinMode(DISARM_BUTTON, INPUT_PULLUP);
+  pinMode(DISARM_LED, OUTPUT);
+  pinMode(ARM_LED, OUTPUT);
+  pinMode(BIOHAZARD_PIN, OUTPUT);
+
+  attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_on, LOW);
+  attachInterrupt(digitalPinToInterrupt(ARM_BUTTON), handle_arm_button_off, HIGH);
+  attachInterrupt(digitalPinToInterrupt(DISARM_BUTTON), handle_disarm_button_on, LOW);
+  attachInterrupt(digitalPinToInterrupt(DISARM_BUTTON), handle_disarm_button_off, HIGH);
+
   arm_timer.begin(0x70);
   disarm_timer.begin(0x71);
   blank_display(arm_timer);
   blank_display(disarm_timer);
   biohazard_strip.begin();
   biohazard_strip.show();
+
+  disarm_timer.drawColon(true);
+  disarm_timer.writeDisplay();
 }
 
 void loop() {
+  //Serial.println(current_state);
+  //delay(50);
   switch(current_state) {
     case DISARMED:
       /*
@@ -190,14 +236,15 @@ void loop() {
       break;
     case ARMED:
       // If the arm_target is now or later than now BOOM!
+      digitalWrite(DISARM_LED, 1); // I don't think this needs to turn off.
       if (arm_target >= millis()) {
-        current_state = DETONATED;
+        transition_state(DETONATED);
       }
       break;
     case DISARMING:
       if (disarm_target >= millis())
       {
-        current_state = DISARMED;
+        transition_state(DISARMED);
       }
       break;
     case DETONATED:
