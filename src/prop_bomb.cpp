@@ -27,7 +27,6 @@ String states_to_words[5] = {
   "DISARMING",
   "DETONATED",
 };
-
 #endif
 
 #define TWO_MINS_IN_MILLIS 120000
@@ -40,8 +39,6 @@ String states_to_words[5] = {
 
 // The number of pixels in the biohazard strip.
 #define BIOHAZARD_PIXEL_COUNT 5
-
-#define BIOHAZARD_GREEN
 
 unsigned long arm_target = 0;
 unsigned long disarm_target = 0;
