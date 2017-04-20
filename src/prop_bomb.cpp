@@ -101,7 +101,7 @@ void blank_display(Adafruit_7segment matrix) {
 }
 
 void render_arm_countdown() {
-  if (current_state == ARMED || current_state == DISARMING){
+  if (current_state == ARMED){
     arm_timer.drawColon(true);
     arm_timer.print(gen_countdown_time(arm_target - millis()));
     arm_timer.writeDisplay();
@@ -233,6 +233,9 @@ void loop() {
       }
       if (last_disarm_button_up_millis + DISARM_GRACE_IN_MILLIS > millis()) {
         transition_state(ARMED);
+        // consider the detonation countdown stopped while disarming, so restart
+        // it here.
+        arm_target = (disarm_target - millis()) + millis();
       } else {
         last_disarm_button_up_millis = millis();
       }
