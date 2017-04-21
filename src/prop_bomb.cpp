@@ -263,7 +263,7 @@ void loop() {
         transition_state(ARMED);
         // consider the detonation countdown stopped while disarming, so restart
         // it here.
-        arm_target = (disarm_target - millis()) + millis();
+        arm_target = (arm_target - millis()) + millis();
       } else {
         last_disarm_button_up_millis = millis();
       }
