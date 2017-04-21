@@ -11,6 +11,7 @@
 #define DISARM_BUTTON 3
 #define DISARM_LED 10
 #define BIOHAZARD_PIN 8
+#define BUZZER_PIN 4
 
 // STATES
 #define DISARMED 0
@@ -92,6 +93,19 @@ unsigned int gen_countdown_time(unsigned long time) {
   retval += time % 60;
 
   return retval;
+}
+
+void play_tone(long duration, int freq) {
+  duration *= 1000;
+  int period = (1.0 / freq) * 1000000;
+  long elapsed_time = 0;
+  while (elapsed_time < duration) {
+    digitalWrite(pinSpeaker, HIGH);
+    delayMicroseconds(period / 2);
+    digitalWrite(pinSpeaker, LOW);
+    delayMicroseconds(period / 2);
+    elapsed_time += (period);
+  }
 }
 
 void blank_display(Adafruit_7segment matrix) {
