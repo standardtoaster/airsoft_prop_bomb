@@ -11,7 +11,7 @@
 #define DISARM_BUTTON 3
 #define DISARM_LED 10
 #define BIOHAZARD_PIN 8
-#define BUZZER_PIN 4
+#define BUZZER_PIN 7
 
 // STATES
 #define DISARMED 0
@@ -100,9 +100,9 @@ void play_tone(long duration, int freq) {
   int period = (1.0 / freq) * 1000000;
   long elapsed_time = 0;
   while (elapsed_time < duration) {
-    digitalWrite(pinSpeaker, HIGH);
+    digitalWrite(BUZZER_PIN, HIGH);
     delayMicroseconds(period / 2);
-    digitalWrite(pinSpeaker, LOW);
+    digitalWrite(BUZZER_PIN, LOW);
     delayMicroseconds(period / 2);
     elapsed_time += (period);
   }
@@ -191,6 +191,8 @@ void render_biohazard(){
 void setup() {
   Serial.begin(9600);
 
+  pinMode(BUZZER_PIN, OUTPUT);
+
   pinMode(ARM_BUTTON, INPUT_PULLUP);
   pinMode(DISARM_BUTTON, INPUT_PULLUP);
 
@@ -228,6 +230,7 @@ void loop() {
       if (digitalRead(ARM_BUTTON) == 0) {
         #ifdef DEBUG
           Serial.println("Arm Button ON");
+          play_tone(19, 1);
         #endif
         // change state to arming and turn on the LED
         transition_state(ARMING);
