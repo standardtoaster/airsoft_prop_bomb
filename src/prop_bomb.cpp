@@ -238,7 +238,7 @@ void loop() {
     case ARMED:
       // If the arm_target is now or later than now BOOM!
       digitalWrite(DISARM_LED, 1);
-      if (arm_target >= millis()) {
+      if (millis() >= arm_target) {
         transition_state(DETONATED);
       }
       if (digitalRead(DISARM_BUTTON) == 0) {
