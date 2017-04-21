@@ -96,6 +96,7 @@ unsigned int gen_countdown_time(unsigned long time) {
 }
 
 void play_tone(long duration, int freq) {
+  // Can use this to make longer tones and such
   duration *= 1000;
   int period = (1.0 / freq) * 1000000;
   long elapsed_time = 0;
@@ -106,6 +107,12 @@ void play_tone(long duration, int freq) {
     delayMicroseconds(period / 2);
     elapsed_time += (period);
   }
+}
+
+void pulse_tone(){
+// Quick pulse - can maybe something more intresting later.
+  tone( BUZZER_PIN, 2000, 500);
+  delay(1000);
 }
 
 void blank_display(Adafruit_7segment matrix) {
@@ -216,6 +223,7 @@ void setup() {
 #endif
 
   transition_state(DISARMED);
+
 }
 
 void loop() {
@@ -230,7 +238,7 @@ void loop() {
       if (digitalRead(ARM_BUTTON) == 0) {
         #ifdef DEBUG
           Serial.println("Arm Button ON");
-          play_tone(19, 1);
+          play_tone(1, 1);
         #endif
         // change state to arming and turn on the LED
         transition_state(ARMING);
@@ -238,6 +246,7 @@ void loop() {
       }
       break;
     case ARMING:
+
       /*
       Handle the ARMING state. The only state that this can transition to is
       ARMED, by flicking the arm switch, the transition of which is handled by
@@ -253,6 +262,7 @@ void loop() {
       }
       break;
     case ARMED:
+      pulse_tone(); // start the beeping
       // If the arm_target is now or later than now BOOM!
       digitalWrite(DISARM_LED, 1);
       if (millis() >= arm_target) {
@@ -290,6 +300,7 @@ void loop() {
       digitalWrite(DISARM_LED, 0);
       break;
   }
+
   render_arm_countdown();
   render_disarm_countdown();
   render_biohazard();
