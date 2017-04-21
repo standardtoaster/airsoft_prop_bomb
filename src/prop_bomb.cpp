@@ -111,7 +111,7 @@ void play_tone(long duration, int freq) {
 
 void pulse_tone(){
 // Quick pulse - can maybe something more intresting later.
-  tone( BUZZER_PIN, 2000, 500);
+  tone( BUZZER_PIN, 2000, 250);
   delay(1000);
 }
 
